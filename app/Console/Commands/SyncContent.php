@@ -2,12 +2,15 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Concerns\FetchesIspringToken;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use App\Models\Content;
 
 class SyncContent extends Command
 {
+    use FetchesIspringToken;
+
     protected $signature = 'content:sync';
     protected $description = 'Sync content (courses/lessons) from iSpring API';
 
@@ -15,14 +18,7 @@ class SyncContent extends Command
     {
         $apiUrl = config('services.cfip.base_url') . '/content';
 
-        // 🔹 Step 1: Get Access Token
-        $tokenResp = Http::asForm()->post(config('services.cfip.token_url'), [
-            'grant_type'    => 'client_credentials',
-            'client_id'     => config('services.cfip.client_id'),
-            'client_secret' => config('services.cfip.client_secret'),
-        ]);
-
-        $token = $tokenResp->json('access_token');
+        $token = $this->fetchToken();
         if (!$token) {
             $this->error('❌ Failed to get token!');
             return Command::FAILURE;

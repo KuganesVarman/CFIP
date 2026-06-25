@@ -3,12 +3,15 @@
 // app/Console/Commands/SyncModules.php
 namespace App\Console\Commands;
 
+use App\Console\Concerns\FetchesIspringToken;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use App\Models\Module;
 
 class SyncModules extends Command
 {
+    use FetchesIspringToken;
+
     protected $signature = 'modules:sync';
     protected $description = 'Sync course modules from iSpring API';
 
@@ -16,14 +19,7 @@ class SyncModules extends Command
     {
         $apiUrl = config('services.cfip.base_url') . '/courses/modules';
 
-        // 1) Token
-        $tokenResp = Http::asForm()->post(config('services.cfip.token_url'), [
-            'grant_type'    => 'client_credentials',
-            'client_id'     => config('services.cfip.client_id'),
-            'client_secret' => config('services.cfip.client_secret'),
-        ]);
-
-        $token = $tokenResp->json('access_token');
+        $token = $this->fetchToken();
         if (!$token) {
             $this->error('Failed to get token!');
             return Command::FAILURE;

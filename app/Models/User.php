@@ -18,6 +18,9 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'department_id',
+        'ispring_user_id',
+        'must_change_password',
     ];
 
     protected $hidden = [
@@ -26,7 +29,8 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'created_at'          => 'datetime',
+        'updated_at'          => 'datetime',
+        'must_change_password' => 'boolean',
     ];
 }

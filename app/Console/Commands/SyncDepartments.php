@@ -2,12 +2,15 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Concerns\FetchesIspringToken;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use App\Models\Department;
 
 class SyncDepartments extends Command
 {
+    use FetchesIspringToken;
+
     protected $signature = 'departments:sync';
     protected $description = 'Sync departments from iSpring API';
 
@@ -15,15 +18,7 @@ class SyncDepartments extends Command
     {
         $apiUrl = rtrim(config('services.cfip.base_url'), '/') . '/departments';
 
-        // STEP 1 — Get Token
-        $tokenResp = Http::asForm()->post(config('services.cfip.token_url'), [
-            'grant_type'    => 'client_credentials',
-            'client_id'     => config('services.cfip.client_id'),
-            'client_secret' => config('services.cfip.client_secret'),
-        ]);
-
-        $token = $tokenResp->json('access_token');
-
+        $token = $this->fetchToken();
         if (!$token) {
             $this->error('❌ Failed to get access token!');
             return Command::FAILURE;

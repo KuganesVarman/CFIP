@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Concerns\FetchesIspringToken;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use App\Models\Group;
@@ -9,18 +10,15 @@ use App\Models\Group;
 
 class SyncGroups extends Command
 {
+    use FetchesIspringToken;
+
     protected $signature = 'group:sync';
     protected $description = 'Sync groups from iSpring API';
 
     public function handle()
 {
     $apiUrl = config('services.cfip.base_url') . '/groups';
-    $tokenResp = Http::asForm()->post(config('services.cfip.token_url'), [
-        'grant_type' => 'client_credentials',
-        'client_id' => config('services.cfip.client_id'),
-        'client_secret' => config('services.cfip.client_secret'),
-    ]);
-    $token = $tokenResp->json('access_token');
+    $token = $this->fetchToken();
     if (!$token) {
         $this->error('Failed to get token!');
         return;
